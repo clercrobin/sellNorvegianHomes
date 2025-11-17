@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-
-interface ContactFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  region: string;
-  budget: string;
-  projectType: string;
-  message: string;
-}
+import { ContactFormData } from "@/lib/types";
+import {
+  sendContactEmail,
+  sendCustomerConfirmation,
+} from "@/lib/email-service";
+import { saveLead } from "@/lib/lead-storage";
+import { withRateLimit, RateLimitPresets } from "@/lib/rate-limit";
 
 // Helper function to validate email
 function isValidEmail(email: string): boolean {
@@ -25,32 +21,39 @@ function isValidPhone(phone: string): boolean {
 
 // Main handler for contact form submission
 async function handleContactSubmission(data: ContactFormData) {
-  // This is where you would integrate with your email service or CRM
-  // For now, we just log to console and simulate success
+  // 1. Send email notification to sales team
+  const emailResult = await sendContactEmail(data);
 
-  console.log("=== NEW CONTACT FORM SUBMISSION ===");
-  console.log("Date:", new Date().toISOString());
-  console.log("Name:", `${data.firstName} ${data.lastName}`);
-  console.log("Email:", data.email);
-  console.log("Phone:", data.phone);
-  console.log("Region:", data.region);
-  console.log("Budget:", data.budget);
-  console.log("Project Type:", data.projectType);
-  console.log("Message:", data.message);
-  console.log("=====================================");
+  if (!emailResult.success) {
+    console.error("Failed to send email:", emailResult.error);
+    // Continue anyway - we still want to save the lead
+  }
 
-  // TODO: Integrate with email service (e.g., SendGrid, Resend, etc.)
-  // Example integration points:
-  // - await sendEmail({ to: 'contact@nordmaison.fr', subject: '...', body: '...' })
-  // - await createCRMLead({ contact: data })
-  // - await sendNotificationToSlack({ data })
+  // 2. Send confirmation email to customer
+  await sendCustomerConfirmation(data).catch((error) => {
+    console.error("Failed to send confirmation:", error);
+    // Non-critical, continue
+  });
+
+  // 3. Save lead to storage (JSON file, or database if configured)
+  try {
+    await saveLead({
+      ...data,
+      source: "website-contact-form",
+    });
+  } catch (error) {
+    console.error("Failed to save lead:", error);
+    // Continue - at least email was sent
+  }
 
   return { success: true };
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
+  // Apply rate limiting: 5 requests per 15 minutes
+  return withRateLimit(request, RateLimitPresets.CONTACT_FORM, async () => {
+    try {
+      const body = await request.json();
 
     // Validate required fields
     const requiredFields = [
@@ -117,16 +120,17 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-  } catch (error) {
-    console.error("Error processing contact form:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Une erreur serveur est survenue",
-      },
-      { status: 500 }
-    );
-  }
+    } catch (error) {
+      console.error("Error processing contact form:", error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Une erreur serveur est survenue",
+        },
+        { status: 500 }
+      );
+    }
+  });
 }
 
 // Handle other HTTP methods

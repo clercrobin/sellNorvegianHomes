@@ -12,7 +12,8 @@ export function Navbar() {
     { name: "Accueil", href: "/" },
     { name: "Nos modèles", href: "/maisons" },
     { name: "Notre processus", href: "/processus" },
-    { name: "À propos", href: "/a-propos" },
+    { name: "Blog", href: "/blog" },
+    { name: "Ressources", href: "/ressources" },
     { name: "FAQ", href: "/faq" },
   ];
 

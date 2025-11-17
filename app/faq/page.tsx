@@ -6,11 +6,18 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { faqItems, getFaqByCategory } from "@/lib/faq";
 import { ArrowRight } from "lucide-react";
+import { FAQSchema } from "@/components/StructuredData";
 
 export default function FaqPage() {
   const [category, setCategory] = useState<string>("all");
 
   const filteredFaqs = getFaqByCategory(category);
+
+  // Prepare FAQ data for structured data
+  const faqSchemaData = faqItems.map((faq) => ({
+    question: faq.question,
+    answer: faq.answer,
+  }));
 
   const categories = [
     { value: "all", label: "Toutes les questions" },
@@ -21,8 +28,10 @@ export default function FaqPage() {
   ];
 
   return (
-    <div className="bg-white">
-      {/* Hero */}
+    <>
+      <FAQSchema faqs={faqSchemaData} />
+      <div className="bg-white">
+        {/* Hero */}
       <div className="bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24">
           <div className="max-w-3xl mx-auto text-center">
@@ -90,5 +99,6 @@ export default function FaqPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
