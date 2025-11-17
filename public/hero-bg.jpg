@@ -1,0 +1,23 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="heroBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#064e3b;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#312e81;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="light" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#heroBg)"/>
+  <circle cx="1400" cy="300" r="400" fill="url(#light)"/>
+  <circle cx="500" cy="700" r="300" fill="url(#light)"/>
+
+  <text x="960" y="500" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle" opacity="0.15">
+    Maisons Norvégiennes
+  </text>
+  <text x="960" y="600" font-family="Arial, sans-serif" font-size="36" fill="white" text-anchor="middle" opacity="0.1">
+    Excellence Scandinave en France
+  </text>
+</svg>
